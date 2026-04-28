@@ -37,7 +37,6 @@
       <p class="text-gray-500 text-sm">Gérez vos cours et vos étudiants</p>
     </div>
 
-    <!-- STATS -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div class="bg-white p-4 rounded-lg shadow">
         <p class="text-sm text-gray-500">Mes Cours</p>
@@ -88,8 +87,17 @@
         <?php } ?>
       </ul>
     </section>
-
-    <!-- US21 -->
+    <?php 
+        $stmt=$conn->prepare('SELECT u.firstname, u.lastname, c.title, e.status
+            FROM enrollments e
+            JOIN students s ON s.id = e.student_id
+            JOIN users u ON u.id = s.user_id
+            JOIN courses c ON c.id = e.course_id
+            WHERE c.user_id = ?');
+        $stmt->execute([2]);
+        $classes=$stmt->fetchAll();
+       
+    ?>
     <section id="effectifs" class="bg-white p-5 rounded-lg shadow">
       <h2 class="font-bold mb-4">Gestion des Effectifs</h2>
 
@@ -100,21 +108,24 @@
         <thead class="bg-gray-100">
           <tr>
             <th class="p-2 text-left">Nom</th>
-            <th class="p-2 text-left">Classe</th>
+            <th class="p-2 text-left">Cours</th>
             <th class="p-2 text-left">Statut</th>
           </tr>
         </thead>
         <tbody>
-          <tr class="border-t">
-            <td class="p-2">Amina</td>
-            <td class="p-2">L2</td>
-            <td class="p-2 text-green-600">Actif</td>
+            <?php ?>
+            <?php  
+                 foreach ($classes as $class) {
+
+                   
+            ?>
+            <tr class="border-t">
+                <td class="p-2"><?= $class['firstname'] ?></td>
+            <td class="p-2"><?= $class['title'] ?></td>
+            <td class="p-2 text-green-600"><?= $class['status'] ?></td>
           </tr>
-          <tr class="border-t">
-            <td class="p-2">Yassine</td>
-            <td class="p-2">L2</td>
-            <td class="p-2 text-yellow-500">En cours</td>
-          </tr>
+            <?php }  ?>
+           
         </tbody>
       </table>
     </section>
