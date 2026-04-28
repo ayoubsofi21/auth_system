@@ -131,11 +131,79 @@
     </section>
 
     <!-- US22 -->
-    <section id="classes" class="bg-white p-5 rounded-lg shadow">
-      <h2 class="font-bold mb-4">Détails des Classes</h2>
-      <p class="text-sm mb-2">Classe : <strong>L2 INFO</strong></p>
-      <p class="text-sm mb-2">Nombre d'étudiants : <strong>64</strong></p>
-      <p class="text-sm">Salle : <strong>205</strong></p>
+ <?php
+$stmt = $conn->prepare("
+    SELECT 
+        c.id,
+        c.name,
+        COUNT(s.id) AS total_students
+    FROM classes c
+    LEFT JOIN students s ON s.class_id = c.id
+    GROUP BY c.id, c.name
+");
+$stmt->execute();
+$classes = $stmt->fetchAll();
+?>
+
+<section class="bg-gray-50 p-6 rounded-lg shadow">
+    <h2 class="text-xl font-bold mb-5 text-gray-800">Mes Classes</h2>
+
+    <?php if (empty($classes)) { ?>
+        <p class="text-gray-500">Aucune classe.</p>
+    <?php } ?>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <?php foreach ($classes as $cls) { ?>
+
+            <?php
+            $stmt2 = $conn->prepare("
+                SELECT u.firstname, u.lastname
+                FROM students s
+                JOIN users u ON u.id = s.user_id
+                WHERE s.class_id = ?
+            ");
+            $stmt2->execute([$cls['id']]);
+            $students = $stmt2->fetchAll();
+            ?>
+
+            <div class="bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition">
+
+                <!-- Class Header -->
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-lg font-semibold text-gray-800">
+                        <?= htmlspecialchars($cls['name']) ?>
+                    </h3>
+
+                    <span class="bg-blue-100 text-blue-600 text-xs font-semibold px-2 py-1 rounded-full">
+                        <?= $cls['total_students'] ?> étudiants
+                    </span>
+                </div>
+
+                <!-- Students -->
+                <div class="border-t pt-3">
+                    <?php if (empty($students)) { ?>
+                        <p class="text-sm text-gray-400">Aucun étudiant</p>
+                    <?php } else { ?>
+                        <ul class="space-y-1">
+                            <?php foreach ($students as $st) { ?>
+                                <li class="text-sm text-gray-700 flex items-center gap-2">
+                                    <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+                                    <?= htmlspecialchars($st['firstname']) ?>
+                                    <?= htmlspecialchars($st['lastname']) ?>
+                                </li>
+                            <?php } ?>
+                        </ul>
+                    <?php } ?>
+                </div>
+
+            </div>
+
+        <?php } ?>
+
+    </div>
+</section>
+</section>
     </section>
 
     <!-- US23 -->
