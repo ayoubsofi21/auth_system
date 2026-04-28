@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Admin</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+<div class="flex">
+
+  <!-- SIDEBAR -->
+  <aside class="w-64 bg-blue-700 text-white min-h-screen p-5 fixed">
+    <h2 class="text-xl font-bold mb-6">Admin Dashboard</h2>
+
+    <nav class="space-y-3 text-sm">
+      <a href="#users" class="nav-link block p-2 rounded hover:bg-blue-600">Utilisateurs</a>
+      <a href="#classes" class="nav-link block p-2 rounded hover:bg-blue-600">Classes</a>
+      <a href="#courses" class="nav-link block p-2 rounded hover:bg-blue-600">Cours</a>
+      <a href="#enrollments" class="nav-link block p-2 rounded hover:bg-blue-600">Inscriptions</a>
+      <a href="#stats" class="nav-link block p-2 rounded hover:bg-blue-600">Statistiques</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="ml-64 flex-1 p-6 space-y-10">
+
+    <!-- HEADER -->
+    <div>
+      <h1 class="text-2xl font-bold">Dashboard Administrateur</h1>
+      <p class="text-gray-500 text-sm">Gestion globale de l’établissement</p>
+    </div>
+
+    <!-- GLOBAL STATS (US19) -->
+    <section id="stats" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-white p-4 rounded-lg shadow">
+        <p class="text-sm text-gray-500">Étudiants</p>
+        <h2 class="text-xl font-bold">120</h2>
+      </div>
+
+      <div class="bg-white p-4 rounded-lg shadow">
+        <p class="text-sm text-gray-500">Professeurs</p>
+        <h2 class="text-xl font-bold">10</h2>
+      </div>
+
+      <div class="bg-white p-4 rounded-lg shadow">
+        <p class="text-sm text-gray-500">Cours</p>
+        <h2 class="text-xl font-bold">8</h2>
+      </div>
+
+      <div class="bg-white p-4 rounded-lg shadow">
+        <p class="text-sm text-gray-500">Classes</p>
+        <h2 class="text-xl font-bold">5</h2>
+      </div>
+    </section>
+
+    <!-- US15 : Gestion des Comptes -->
+    <section id="users" class="bg-white p-5 rounded-lg shadow">
+      <h2 class="font-bold mb-4">Gestion des Comptes</h2>
+
+      <button class="bg-blue-600 text-white px-4 py-2 rounded text-sm mb-4">
+        + Ajouter Utilisateur
+      </button>
+
+      <table class="w-full text-sm">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-2 text-left">Nom</th>
+            <th class="p-2 text-left">Email</th>
+            <th class="p-2 text-left">Rôle</th>
+            <th class="p-2 text-left">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr class="border-t">
+            <td class="p-2">Ayoub</td>
+            <td class="p-2">ayoub@mail.com</td>
+            <td class="p-2">Prof</td>
+            <td class="p-2 space-x-2">
+              <button class="bg-yellow-400 px-2 py-1 rounded text-xs">Edit</button>
+              <button class="bg-red-500 text-white px-2 py-1 rounded text-xs">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- US16 : Classes -->
+    <section id="classes" class="bg-white p-5 rounded-lg shadow">
+      <h2 class="font-bold mb-4">Structure Académique</h2>
+
+      <button class="bg-blue-600 text-white px-4 py-2 rounded text-sm mb-4">
+        + Ajouter Classe
+      </button>
+
+      <table class="w-full text-sm">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-2 text-left">ID</th>
+            <th class="p-2 text-left">Nom</th>
+            <th class="p-2 text-left">Salle</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr class="border-t">
+            <td class="p-2">1</td>
+            <td class="p-2">L2 INFO</td>
+            <td class="p-2">205</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- US17 : Cours -->
+    <section id="courses" class="bg-white p-5 rounded-lg shadow">
+      <h2 class="font-bold mb-4">Gestion des Cours</h2>
+
+      <button class="bg-blue-600 text-white px-4 py-2 rounded text-sm mb-4">
+        + Ajouter Cours
+      </button>
+
+      <table class="w-full text-sm">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-2 text-left">Cours</th>
+            <th class="p-2 text-left">Professeur</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr class="border-t">
+            <td class="p-2">Développement Web</td>
+            <td class="p-2">Mr. Ali</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- US18 : Inscriptions -->
+    <section id="enrollments" class="bg-white p-5 rounded-lg shadow">
+      <h2 class="font-bold mb-4">Administration des Inscriptions</h2>
+
+      <form class="grid md:grid-cols-3 gap-3 mb-4">
+        <input type="text" placeholder="Étudiant" class="border p-2 rounded text-sm">
+        <input type="text" placeholder="Cours" class="border p-2 rounded text-sm">
+        <button class="bg-green-600 text-white rounded text-sm">Inscrire</button>
+      </form>
+
+      <table class="w-full text-sm">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="p-2 text-left">Étudiant</th>
+            <th class="p-2 text-left">Cours</th>
+            <th class="p-2 text-left">Statut</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr class="border-t">
+            <td class="p-2">Amina</td>
+            <td class="p-2">Web</td>
+            <td class="p-2 text-green-600">Actif</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+</div>
+
+<!-- ACTIVE LINK SCRIPT -->
+<script>
+  const links = document.querySelectorAll('.nav-link');
+
+  links.forEach(link => {
+    link.addEventListener('click', function () {
+      links.forEach(l => l.classList.remove('bg-blue-900'));
+      this.classList.add('bg-blue-900');
+    });
+  });
+</script>
+
+</body>
+</html>
