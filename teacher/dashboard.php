@@ -31,7 +31,6 @@
   <!-- MAIN -->
   <main class="ml-64 flex-1 p-6 space-y-10">
 
-    <!-- HEADER -->
     <div>
       <h1 class="text-2xl font-bold">Dashboard Professeur</h1>
       <p class="text-gray-500 text-sm">Gérez vos cours et vos étudiants</p>
@@ -56,12 +55,32 @@
         </h2>
       </div>
       <div class="bg-white p-4 rounded-lg shadow">
+        <?php 
+            $stmt=$conn->prepare("
+            select count(*) from users 
+            where role_id=?
+            ");
+            $stmt->execute([3]); //
+            $count=$stmt->fetchColumn();
+
+        ?>
         <p class="text-sm text-gray-500">Étudiants</p>
-        <h2 class="text-xl font-bold">72</h2>
+        <h2 class="text-xl font-bold"><?php echo $count; ?></h2>
       </div>
       <div class="bg-white p-4 rounded-lg shadow">
+        <?php 
+              $stmt=$conn->prepare("
+            select count(*) from roles 
+            inner join users on users.role_id=roles.id
+            inner join students on students.user_id=users.id 
+            inner join classes on classes.id=students.class_id
+            where roles.id=?
+            ");
+            $stmt->execute([3]); //
+            $count=$stmt->fetchColumn();
+        ?>
         <p class="text-sm text-gray-500">Classes</p>
-        <h2 class="text-xl font-bold">3</h2>
+        <h2 class="text-xl font-bold"><?php echo $count; ?></h2>
       </div>
       <div class="bg-white p-4 rounded-lg shadow">
         <p class="text-sm text-gray-500">Actifs</p>
