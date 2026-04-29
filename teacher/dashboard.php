@@ -206,38 +206,83 @@ $classes = $stmt->fetchAll();
 </section>
     </section>
 
-    <!-- US23 -->
-    <section id="suivi" class="bg-white p-5 rounded-lg shadow">
-      <h2 class="font-bold mb-4">Suivi Pédagogique</h2>
+  <!-- US23 -->
+   <?php
+       $stmt = $conn->prepare("
+            SELECT 
+                e.id AS enrollment_id,
+                CONCAT(u.firstname, ' ', u.lastname) AS student_name,
+                c.title AS course_name,
+                e.status
+            FROM enrollments e
+            JOIN students s ON s.id = e.student_id
+            JOIN users u ON u.id = s.user_id
+            JOIN courses c ON c.id = e.course_id
+        ");
+        $stmt->execute();
+        $enrollments = $stmt->fetchAll();
+        ?>
 
-      <table class="w-full text-sm">
-        <thead class="bg-gray-100">
-          <tr>
-            <th class="p-2 text-left">Étudiant</th>
-            <th class="p-2 text-left">Cours</th>
-            <th class="p-2 text-left">Statut</th>
-            <th class="p-2 text-left">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="border-t">
-            <td class="p-2">Amina</td>
-            <td class="p-2">Web</td>
-            <td class="p-2">
-              <select class="border rounded p-1 text-sm">
-                <option>Actif</option>
-                <option>Terminé</option>
-              </select>
-            </td>
-            <td class="p-2">
-              <button class="bg-blue-600 text-white px-3 py-1 rounded text-xs">
-                Save
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+        <!-- US23 -->
+         <?php
+            if (isset($_POST['update_status'])) {
+
+                $enrollment_id = $_POST['enrollment_id'];
+                $status = $_POST['status'];
+
+                $stmt = $conn->prepare("
+                    UPDATE enrollments 
+                    SET status = ? 
+                    WHERE id = ?
+                ");
+
+                $stmt->execute([$status, $enrollment_id]);
+            }
+            ?>
+        <section id="suivi" class="bg-white p-5 rounded-lg shadow">
+        <h2 class="font-bold mb-4">Suivi Pédagogique</h2>
+
+        <table class="w-full text-sm">
+            <thead class="bg-gray-100">
+            <tr>
+                <th class="p-2 text-left">Étudiant</th>
+                <th class="p-2 text-left">Cours</th>
+                <th class="p-2 text-left">Statut</th>
+                <th class="p-2 text-left">Action</th>
+            </tr>
+            </thead>
+
+            <tbody>
+                <?php foreach ($enrollments as $enroll): ?>
+                <tr class="border-t">
+
+                <td class="p-2"><?= htmlspecialchars($enroll['student_name']) ?></td>
+                <td class="p-2"><?= htmlspecialchars($enroll['course_name']) ?></td>
+
+                <form method="POST" action="">
+                    
+                    <td class="p-2">
+                    <select name="status" class="border rounded p-1 text-sm">
+                        <option value="actif" <?= $enroll['status'] == "actif" ? "selected" : "" ?>>Actif</option>
+                        <option value="termine" <?= $enroll['status'] == "termine" ? "selected" : "" ?>>Terminé</option>
+                    </select>
+                    </td>
+
+                    <td class="p-2">
+                    <input type="hidden" name="enrollment_id" value="<?= $enroll['enrollment_id'] ?>">
+                    <button type="submit" name="update_status"
+                        class="bg-blue-600 text-white px-3 py-1 rounded text-xs">
+                        Save
+                    </button>
+                    </td>
+
+                </form>
+
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        </section>
 
   </main>
 </div>
