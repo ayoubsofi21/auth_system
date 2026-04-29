@@ -130,79 +130,101 @@
       </table>
     </section>
 
-    <!-- US22 -->
- <?php
-$stmt = $conn->prepare("
-    SELECT 
-        c.id,
-        c.name,
-        COUNT(s.id) AS total_students
-    FROM classes c
-    LEFT JOIN students s ON s.class_id = c.id
-    GROUP BY c.id, c.name
-");
-$stmt->execute();
-$classes = $stmt->fetchAll();
-?>
+     <!-- US21 (Gestion des Effectifs) : En tant que prof, je peux afficher la liste des étudiants inscrits à chacun de mes cours . -->
+        <?php
+        $stmt = $conn->prepare("
+            SELECT 
+                c.id,
+                c.name,
+                COUNT(s.id) AS total_students
+            FROM classes c
+            LEFT JOIN students s ON s.class_id = c.id
+            GROUP BY c.id, c.name
+        ");
+        $stmt->execute();
+        $classes = $stmt->fetchAll();
+        $selectedClass = null;
+        $students = [];
 
-<section id='classes' class="bg-gray-50 p-6 rounded-lg shadow">
-    <h2 class="text-xl font-bold mb-5 text-gray-800">Mes Classes</h2>
+        if (isset($_GET['class_id'])) {
+            $selectedClass = $_GET['class_id'];
 
-    <?php if (empty($classes)) { ?>
-        <p class="text-gray-500">Aucune classe.</p>
-    <?php } ?>
-
-    <div  class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-        <?php foreach ($classes as $cls) { ?>
-
-            <?php
             $stmt2 = $conn->prepare("
                 SELECT u.firstname, u.lastname
                 FROM students s
                 JOIN users u ON u.id = s.user_id
                 WHERE s.class_id = ?
             ");
-            $stmt2->execute([$cls['id']]);
+            $stmt2->execute([$selectedClass]);
             $students = $stmt2->fetchAll();
-            ?>
+        }
+        ?>
 
-            <div class="bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition">
+        <section id="classes" class="bg-gray-50 p-6 rounded-lg shadow">
 
-                <!-- Class Header -->
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-lg font-semibold text-gray-800">
-                        <?= htmlspecialchars($cls['name']) ?>
-                    </h3>
+            <h2 class="text-xl font-bold mb-5 text-gray-800">Mes Classes</h2>
 
-                    <span class="bg-blue-100 text-blue-600 text-xs font-semibold px-2 py-1 rounded-full">
-                        <?= $cls['total_students'] ?> étudiants
-                    </span>
-                </div>
+            <?php if (empty($classes)) { ?>
+                <p class="text-gray-500">Aucune classe.</p>
+            <?php } ?>
 
-                <!-- Students -->
-                <div class="border-t pt-3">
-                    <?php if (empty($students)) { ?>
-                        <p class="text-sm text-gray-400">Aucun étudiant</p>
-                    <?php } else { ?>
-                        <ul class="space-y-1">
-                            <?php foreach ($students as $st) { ?>
-                                <li class="text-sm text-gray-700 flex items-center gap-2">
-                                    <span class="w-2 h-2 bg-green-400 rounded-full"></span>
-                                    <?= htmlspecialchars($st['firstname']) ?>
-                                    <?= htmlspecialchars($st['lastname']) ?>
-                                </li>
-                            <?php } ?>
-                        </ul>
-                    <?php } ?>
-                </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <?php foreach ($classes as $cls) { ?>
+
+                    <div class="bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition">
+
+                        <div class="flex justify-between items-center mb-3">
+
+                            <h3 class="text-lg font-semibold text-gray-800">
+                                <?= htmlspecialchars($cls['name']) ?>
+                            </h3>
+
+                            <span class="bg-blue-100 text-blue-600 text-xs font-semibold px-2 py-1 rounded-full">
+                                <?= $cls['total_students'] ?> étudiants
+                            </span>
+
+                        </div>
+
+                        <a href="?class_id=<?php echo $cls['id']; ?>#students"
+                        class="bg-blue-600 text-white px-3 py-1 rounded text-xs inline-block">
+                            Voir étudiants
+                        </a>
+
+                    </div>
+
+                <?php } ?>
 
             </div>
+        </section>
+
+        <?php if ($selectedClass) { ?>
+
+        <section id="students" class="bg-white p-5 rounded-lg shadow mt-5">
+
+            <h2 class="text-xl font-bold mb-4 text-gray-800">
+                Étudiants de la classe
+            </h2>
+
+            <?php if (empty($students)) { ?>
+                <p class="text-gray-500">Aucun étudiant dans cette classe.</p>
+            <?php } else { ?>
+
+                <ul class="space-y-2">
+                    <?php foreach ($students as $st) { ?>
+                        <li class="text-sm text-gray-700 flex items-center gap-2">
+                            <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+                            <?= htmlspecialchars($st['firstname']) ?>
+                            <?= htmlspecialchars($st['lastname']) ?>
+                        </li>
+                    <?php } ?>
+                </ul>
+
+            <?php } ?>
+
+        </section>
 
         <?php } ?>
-
-    </div>
-</section>
 </section>
     </section>
 
