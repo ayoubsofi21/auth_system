@@ -145,14 +145,14 @@ $stmt->execute();
 $classes = $stmt->fetchAll();
 ?>
 
-<section class="bg-gray-50 p-6 rounded-lg shadow">
+<section id='classes' class="bg-gray-50 p-6 rounded-lg shadow">
     <h2 class="text-xl font-bold mb-5 text-gray-800">Mes Classes</h2>
 
     <?php if (empty($classes)) { ?>
         <p class="text-gray-500">Aucune classe.</p>
     <?php } ?>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div  class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
         <?php foreach ($classes as $cls) { ?>
 
