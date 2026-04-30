@@ -1,5 +1,6 @@
 <?php
-include(__DIR__ . "/database.php");
+include("database.php");
+
 $email = $_POST['email'];
 $password = $_POST['password'];
 
@@ -36,7 +37,8 @@ $user = $sql->fetch();
         session_start();
         $_SESSION['name'] = $user['firstname'];
         // $_SESSION['name'] = $user['email'];
-        header("Location: ../teacher/dashboard.php");
+
+        header("Location: ../public/dashboard.php");
         exit();
     }else{
         header("Location: ../public/login.php");
