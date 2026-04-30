@@ -1,4 +1,4 @@
--- Active: 1776332007246@@127.0.0.1@3306@edusync
+-- Active: 1777541647777@@127.0.0.1@3306@edusync
 CREATE DATABASE edusync ;
 USE edusync ;
 
@@ -30,7 +30,7 @@ CREATE TABLE courses (
     description TEXT NOT NULL,
     total_hours INT NOT NULL,
     user_id INT,
-    ADD FOREIGN KEY (user_id) REFERENCES users(id));
+    FOREIGN KEY (user_id) REFERENCES users(id));
 
 
 
@@ -53,10 +53,16 @@ CREATE TABLE enrollments (
     FOREIGN KEY (students_id) REFERENCES students(id),
     courses_id INT ,
     FOREIGN KEY (courses_id) REFERENCES courses(id),
-    ADD UNIQUE (students_id , courses_id)
+    UNIQUE (students_id , courses_id)
 );
 
+INSERT INTO roles (label)
+VALUES ('Admin'),
+        ('Prof'),
+        ('Student');
 
 
-
+INSERT INTO students(student_number , ){
+VALUES()
+};
 
