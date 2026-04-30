@@ -85,18 +85,19 @@
         <h2 class="text-xl font-bold"><?php echo $count; ?></h2>
       </div>
       <?php 
-             $stmt=$conn->prepare('SELECT u.firstname, u.lastname, c.title, e.status
+        $stmt = $conn->prepare("
+            SELECT COUNT(*) 
             FROM enrollments e
-            JOIN students s ON s.id = e.student_id
-            JOIN users u ON u.id = s.user_id
             JOIN courses c ON c.id = e.course_id
-            WHERE c.user_id = ?');
+            WHERE c.user_id = ? AND e.status = 'actif'
+        ");
+
         $stmt->execute([2]);
-        $classes=$stmt->fetchColumn();
+        $count = $stmt->fetchColumn();
       ?>
       <div class="bg-white p-4 rounded-lg shadow">
-        <p class="text-sm text-gray-500">Actifs</p>
-        <h2 class="text-xl font-bold">60</h2>
+         <p class="text-sm text-gray-500">Actifs</p>
+         <h2 class="text-xl font-bold"><?php echo $count; ?></h2>
       </div>
     </div>
 
