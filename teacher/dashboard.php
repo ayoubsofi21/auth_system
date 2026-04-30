@@ -69,19 +69,31 @@
       </div>
       <div class="bg-white p-4 rounded-lg shadow">
         <?php 
-              $stmt=$conn->prepare("
-            select count(*) from roles 
-            inner join users on users.role_id=roles.id
-            inner join students on students.user_id=users.id 
-            inner join classes on classes.id=students.class_id
-            where roles.id=?
-            ");
-            $stmt->execute([3]); //
-            $count=$stmt->fetchColumn();
+             $stmt = $conn->prepare("
+            SELECT COUNT(DISTINCT classes.id)
+            FROM classes
+            INNER JOIN students ON students.class_id = classes.id
+            INNER JOIN enrollments ON enrollments.student_id = students.id
+            INNER JOIN courses ON courses.id = enrollments.course_id
+            WHERE courses.user_id = ?
+        ");
+
+        $stmt->execute([2]); 
+        $count = $stmt->fetchColumn();
         ?>
         <p class="text-sm text-gray-500">Classes</p>
         <h2 class="text-xl font-bold"><?php echo $count; ?></h2>
       </div>
+      <?php 
+             $stmt=$conn->prepare('SELECT u.firstname, u.lastname, c.title, e.status
+            FROM enrollments e
+            JOIN students s ON s.id = e.student_id
+            JOIN users u ON u.id = s.user_id
+            JOIN courses c ON c.id = e.course_id
+            WHERE c.user_id = ?');
+        $stmt->execute([2]);
+        $classes=$stmt->fetchColumn();
+      ?>
       <div class="bg-white p-4 rounded-lg shadow">
         <p class="text-sm text-gray-500">Actifs</p>
         <h2 class="text-xl font-bold">60</h2>
@@ -135,8 +147,7 @@
             <?php ?>
             <?php  
                  foreach ($classes as $class) {
-
-                   
+ 
             ?>
             <tr class="border-t">
                 <td class="p-2"><?= $class['firstname'] ?></td>
