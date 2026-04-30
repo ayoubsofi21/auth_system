@@ -20,7 +20,7 @@ INSERT INTO classes(name, classroom_number) VALUES('3A Dev', 'C303'),
 ('Multimédia', 'M110');
 
 
-use DATABASE EDUSYNC;
+use  EDUSYNC;
 CREATE roles(id int PRIMARY KEY AUTO_INCREMENT ,label varchar(255))
 CREATE TABLE users(id int PRIMARY KEY AUTO_INCREMENT ,firstname varchar(100),lastname varchar(100),email varchar(150) UNIQUE,password varchar(255),role_id int,Foreign Key (role_id) REFERENCES roles(id));
 CREATE TABLE classes(id int PRIMARY KEY AUTO_INCREMENT ,name varchar(100),classroom_number varchar(255)) ;

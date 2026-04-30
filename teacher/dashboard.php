@@ -1,5 +1,11 @@
 <?php 
-    include('../scripts/database.php');
+    session_start();
+    include('../public/scripts/database.php');
+    if(!isset($_SESSION['name'])){
+        header('location : ../public/scripts/logout.php');
+        exit();
+    }
+    $username=$_SESSION['name'];
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -7,8 +13,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Professeur</title>
-
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -25,6 +29,7 @@
       <a href="#effectifs" class="nav-link block p-2 rounded hover:bg-blue-600">Effectifs</a>
       <a href="#classes" class="nav-link block p-2 rounded hover:bg-blue-600">Classes</a>
       <a href="#suivi" class="nav-link block p-2 rounded hover:bg-blue-600">Suivi</a>
+     
     </nav>
   </aside>
 
@@ -33,6 +38,7 @@
 
     <div>
       <h1 class="text-2xl font-bold">Dashboard Professeur</h1>
+      <h1 class="bg-red-500"><?php echo $username; ?></h1>
       <p class="text-gray-500 text-sm">Gérez vos cours et vos étudiants</p>
     </div>
 

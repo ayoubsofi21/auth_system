@@ -1,6 +1,5 @@
 <?php
-include("database.php");
-
+include(__DIR__ . "/database.php");
 $email = $_POST['email'];
 $password = $_POST['password'];
 
