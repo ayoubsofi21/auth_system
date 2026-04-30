@@ -1,5 +1,5 @@
 <?php
-include("./database.php");
+include(__DIR__ . "/database.php");
 
 
 $name = $_POST['name'];
@@ -28,8 +28,7 @@ $stmt = $conn->prepare($sql);
 $result = $stmt->execute([$name , $email , $password]);
 if(isset($signup_btn)){
     if($result){
-
-        header("Location: ../public/login.php");
+       header("Location: ../login.php");
         exit();
 
     }
