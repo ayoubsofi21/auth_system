@@ -22,8 +22,8 @@
                     <h2 class="text-center text-2xl font-bold tracking-wide text-gray-800">Sign Up</h2>
                     <p class="text-center text-sm text-gray-600 mt-2">Already have an account? <a href="./login.php" class="text-blue-600 hover:text-blue-700 hover:underline" title="Sign In">Sign in here</a></p>
 
-                    <form class="my-8 text-sm" action="../public/scripts/registerlogic.php" method="post">
-                        <div class="flex flex-col my-4">
+                    <form class="my-8 text-sm" action="../scripts/registerlogic.php" method="POST">   
+                    <div class="flex flex-col my-4">
                             <label for="name" class="text-gray-700">Name</label>
                             <input type="text" name="name" id="name" class="mt-2 p-2 border border-gray-300 focus:outline-none focus:ring-0 focus:border-gray-300 rounded text-sm text-gray-900" placeholder="Enter your name">
                         </div>

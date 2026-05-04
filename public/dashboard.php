@@ -1,12 +1,15 @@
 <?php
 session_start();
 include("../scripts/database.php");
+require '../includes/auth.php';
+requireLogin();
+requireRole('Admin');
 
-if(!isset($_SESSION['name'])) {
-  header("Location: ../public/login.php");
-  exit();
-}
-  $name = $_SESSION['name'];
+// if(!isset($_SESSION['name'])) {
+//   header("Location: ../public/login.php");
+//   exit();
+// }
+//   $name = $_SESSION['name'];
 
 
 ?>

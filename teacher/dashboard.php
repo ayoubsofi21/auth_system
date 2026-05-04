@@ -1,12 +1,14 @@
 <?php 
-    session_start();
-    include('../public/scripts/database.php');
-    if(!isset($_SESSION['name'])){
-        header('location : ../public/scripts/logout.php');
-        exit();
-    }
-    $username=$_SESSION['name'];
+session_start();
+include('../scripts/database.php');
+require '../includes/auth.php';
+
+requireLogin();
+requireRole('Prof');
+
+$teacher_id = $_SESSION['user_id'];
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -20,342 +22,300 @@
 
 <div class="flex">
 
-  <!-- SIDEBAR -->
-  <aside class="w-64 bg-blue-700 text-white min-h-screen p-5 fixed">
-    <h2 class="text-xl font-bold mb-6">Prof Dashboard</h2>
+<!-- SIDEBAR -->
+<aside class="w-64 bg-blue-700 text-white min-h-screen p-5 fixed">
+  <h2 class="text-xl font-bold mb-6">Prof Dashboard</h2>
 
-    <nav class="space-y-3 text-sm">
-      <a href="#cours" class="nav-link block p-2 rounded hover:bg-blue-600">Mes Cours</a>
-      <a href="#effectifs" class="nav-link block p-2 rounded hover:bg-blue-600">Effectifs</a>
-      <a href="#classes" class="nav-link block p-2 rounded hover:bg-blue-600">Classes</a>
-      <a href="#suivi" class="nav-link block p-2 rounded hover:bg-blue-600">Suivi</a>
-     
-    </nav>
-  </aside>
+  <nav class="space-y-3 text-sm">
+    <a href="#cours" class="nav-link block p-2 rounded hover:bg-blue-600">Mes Cours</a>
+    <a href="#effectifs" class="nav-link block p-2 rounded hover:bg-blue-600">Effectifs</a>
+    <a href="#classes" class="nav-link block p-2 rounded hover:bg-blue-600">Classes</a>
+    <a href="#suivi" class="nav-link block p-2 rounded hover:bg-blue-600">Suivi</a>
+  </nav> 
+  <a href="../scripts/logout.php"
+    class="block p-2 mt-6 bg-red-500 hover:bg-red-600 rounded text-center">
+    Se déconnecter
+    </a>
+</aside>
 
-  <!-- MAIN -->
-  <main class="ml-64 flex-1 p-6 space-y-10">
+<!-- MAIN -->
+<main class="ml-64 flex-1 p-6 space-y-10">
 
-    <div>
-      <h1 class="text-2xl font-bold">Dashboard Professeur</h1>
-      <h1 class="bg-red-500"><?php echo $username; ?></h1>
-      <p class="text-gray-500 text-sm">Gérez vos cours et vos étudiants</p>
-    </div>
+  <div>
+    <h1 class="text-2xl font-bold">Dashboard Professeur</h1>
+    <p class="text-gray-500 text-sm">Gérez vos cours et vos étudiants</p>
+  </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="bg-white p-4 rounded-lg shadow">
-        <p class="text-sm text-gray-500">Mes Cours</p>
-       <h2 class="text-xl font-bold">
-        <?php 
-            $stmt = $conn->prepare("
-                SELECT COUNT(*) 
-                FROM courses 
-                WHERE user_id = ?
-            ");
+  <!-- STATS -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
 
-            $stmt->execute([2]); //  $_SESSION['user_id']
-            $count = $stmt->fetchColumn();
+    <?php
+    // My courses
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM courses WHERE user_id = ?");
+    $stmt->execute([$teacher_id]);
+    $courses_count = $stmt->fetchColumn();
 
-            echo $count;
-        ?>
-        </h2>
-      </div>
-      <div class="bg-white p-4 rounded-lg shadow">
-        <?php 
-            $stmt=$conn->prepare("
-            select count(*) from users 
-            where role_id=?
-            ");
-            $stmt->execute([3]); //
-            $count=$stmt->fetchColumn();
+    // Students
+    $stmt = $conn->prepare("
+        SELECT COUNT(*)
+        FROM students s
+        JOIN enrollments e ON e.student_id = s.id
+        JOIN courses c ON c.id = e.course_id
+        WHERE c.user_id = ?
+    ");
+    $stmt->execute([$teacher_id]);
+    $students_count = $stmt->fetchColumn();
 
-        ?>
-        <p class="text-sm text-gray-500">Étudiants</p>
-        <h2 class="text-xl font-bold"><?php echo $count; ?></h2>
-      </div>
-      <div class="bg-white p-4 rounded-lg shadow">
-        <?php 
-             $stmt = $conn->prepare("
-            SELECT COUNT(DISTINCT classes.id)
-            FROM classes
-            INNER JOIN students ON students.class_id = classes.id
-            INNER JOIN enrollments ON enrollments.student_id = students.id
-            INNER JOIN courses ON courses.id = enrollments.course_id
-            WHERE courses.user_id = ?
-        ");
+    // Classes
+    $stmt = $conn->prepare("
+        SELECT COUNT(DISTINCT c.id)
+        FROM classes c
+        JOIN students s ON s.class_id = c.id
+        JOIN enrollments e ON e.student_id = s.id
+        JOIN courses co ON co.id = e.course_id
+        WHERE co.user_id = ?
+    ");
+    $stmt->execute([$teacher_id]);
+    $classes_count = $stmt->fetchColumn();
 
-        $stmt->execute([2]); 
-        $count = $stmt->fetchColumn();
-        ?>
-        <p class="text-sm text-gray-500">Classes</p>
-        <h2 class="text-xl font-bold"><?php echo $count; ?></h2>
-      </div>
-      <?php 
-        $stmt = $conn->prepare("
-            SELECT COUNT(*) 
-            FROM enrollments e
-            JOIN courses c ON c.id = e.course_id
-            WHERE c.user_id = ? AND e.status = 'actif'
-        ");
-
-        $stmt->execute([2]);
-        $count = $stmt->fetchColumn();
-      ?>
-      <div class="bg-white p-4 rounded-lg shadow">
-         <p class="text-sm text-gray-500">Actifs</p>
-         <h2 class="text-xl font-bold"><?php echo $count; ?></h2>
-      </div>
-    </div>
-
-    <!-- US20 -->
-    <section id="cours" class="bg-white p-5 rounded-lg shadow">
-      <h2 class="font-bold mb-4">Mes Enseignements</h2>
-        <?php 
-            $sql='select*from courses where user_id=?';
-            $stmt=$conn->prepare($sql);
-            $stmt->execute([2]);
-            $results=$stmt->fetchAll();      
-         ?>   
-      <ul class="space-y-2 text-sm">  
-        <?php foreach ($results as $course) { ?>
-        <li class="flex justify-between border-b pb-2">
-          <span><?= $course['title']?></span>
-          <span class="text-gray-500"><?= $course['total_hours']?></span>
-        </li>
-        <?php } ?>
-      </ul>
-    </section>
-    <?php 
-        $stmt=$conn->prepare('SELECT u.firstname, u.lastname, c.title, e.status
-            FROM enrollments e
-            JOIN students s ON s.id = e.student_id
-            JOIN users u ON u.id = s.user_id
-            JOIN courses c ON c.id = e.course_id
-            WHERE c.user_id = ?');
-        $stmt->execute([2]);
-        $classes=$stmt->fetchAll();
-       
+    // Active enrollments
+    $stmt = $conn->prepare("
+        SELECT COUNT(*)
+        FROM enrollments e
+        JOIN courses c ON c.id = e.course_id
+        WHERE c.user_id = ? AND e.status = 'actif'
+    ");
+    $stmt->execute([$teacher_id]);
+    $active_count = $stmt->fetchColumn();
     ?>
-    <section id="effectifs" class="bg-white p-5 rounded-lg shadow">
-      <h2 class="font-bold mb-4">Gestion des Effectifs</h2>
 
-      <input type="text" placeholder="Rechercher..."
-        class="border p-2 rounded w-full mb-4 text-sm">
+    <div class="bg-white p-4 rounded shadow">
+      <p class="text-sm text-gray-500">Mes Cours</p>
+      <h2 class="text-xl font-bold"><?= $courses_count ?></h2>
+    </div>
 
-      <table class="w-full text-sm">
-        <thead class="bg-gray-100">
-          <tr>
-            <th class="p-2 text-left">Nom</th>
-            <th class="p-2 text-left">Cours</th>
-            <th class="p-2 text-left">Statut</th>
+    <div class="bg-white p-4 rounded shadow">
+      <p class="text-sm text-gray-500">Étudiants</p>
+      <h2 class="text-xl font-bold"><?= $students_count ?></h2>
+    </div>
+
+    <div class="bg-white p-4 rounded shadow">
+      <p class="text-sm text-gray-500">Classes</p>
+      <h2 class="text-xl font-bold"><?= $classes_count ?></h2>
+    </div>
+
+    <div class="bg-white p-4 rounded shadow">
+      <p class="text-sm text-gray-500">Actifs</p>
+      <h2 class="text-xl font-bold"><?= $active_count ?></h2>
+    </div>
+
+  </div>
+
+  <!-- COURSES -->
+  <section id="cours" class="bg-white p-5 rounded shadow">
+    <h2 class="font-bold mb-4">Mes Enseignements</h2>
+
+    <?php
+    $stmt = $conn->prepare("SELECT * FROM courses WHERE user_id = ?");
+    $stmt->execute([$teacher_id]);
+    $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    ?>
+
+    <ul class="space-y-2 text-sm">
+      <?php foreach ($courses as $course): ?>
+        <li class="flex justify-between border-b pb-2">
+          <span><?= htmlspecialchars($course['title']) ?></span>
+          <span class="text-gray-500"><?= $course['total_hours'] ?>h</span>
+        </li>
+      <?php endforeach; ?>
+    </ul>
+  </section>
+
+  <!-- EFFECTIFS -->
+  <section id="effectifs" class="bg-white p-5 rounded shadow">
+    <h2 class="font-bold mb-4">Gestion des Effectifs</h2>
+
+    <?php
+    $stmt = $conn->prepare("
+        SELECT 
+            u.firstname,
+            u.lastname,
+            c.title,
+            e.status
+        FROM enrollments e
+        JOIN students s ON s.id = e.student_id
+        JOIN users u ON u.id = s.user_id
+        JOIN courses c ON c.id = e.course_id
+        WHERE c.user_id = ?
+    ");
+    $stmt->execute([$teacher_id]);
+    $effectifs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    ?>
+
+    <table class="w-full text-sm">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="p-2 text-left">Nom</th>
+          <th class="p-2 text-left">Cours</th>
+          <th class="p-2 text-left">Statut</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <?php foreach ($effectifs as $row): ?>
+          <tr class="border-t">
+            <td class="p-2"><?= htmlspecialchars($row['firstname'].' '.$row['lastname']) ?></td>
+            <td class="p-2"><?= htmlspecialchars($row['title']) ?></td>
+            <td class="p-2 text-green-600"><?= htmlspecialchars($row['status']) ?></td>
           </tr>
-        </thead>
-        <tbody>
-            <?php ?>
-            <?php  
-                 foreach ($classes as $class) {
- 
-            ?>
-            <tr class="border-t">
-                <td class="p-2"><?= $class['firstname'] ?></td>
-            <td class="p-2"><?= $class['title'] ?></td>
-            <td class="p-2 text-green-600"><?= $class['status'] ?></td>
-          </tr>
-            <?php }  ?>
-           
-        </tbody>
-      </table>
-    </section>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </section>
 
-     <!-- US21 (Gestion des Effectifs) : En tant que prof, je peux afficher la liste des étudiants inscrits à chacun de mes cours . -->
-        <?php
-        $stmt = $conn->prepare("
-            SELECT 
-                c.id,
-                c.name,
-                COUNT(s.id) AS total_students
-            FROM classes c
-            LEFT JOIN students s ON s.class_id = c.id
-            GROUP BY c.id, c.name
-        ");
-        $stmt->execute();
-        $classes = $stmt->fetchAll();
-        $selectedClass = null;
-        $students = [];
+  <!-- CLASSES -->
+  <section id="classes" class="bg-white p-5 rounded shadow">
+    <h2 class="font-bold mb-4">Mes Classes</h2>
 
-        if (isset($_GET['class_id'])) {
-            $selectedClass = $_GET['class_id'];
+    <?php
+    $stmt = $conn->prepare("
+        SELECT 
+            c.id,
+            c.name,
+            COUNT(s.id) AS total_students
+        FROM classes c
+        LEFT JOIN students s ON s.class_id = c.id
+        GROUP BY c.id, c.name
+    ");
+    $stmt->execute();
+    $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    ?>
 
-            $stmt2 = $conn->prepare("
-                SELECT u.firstname, u.lastname
-                FROM students s
-                JOIN users u ON u.id = s.user_id
-                WHERE s.class_id = ?
-            ");
-            $stmt2->execute([$selectedClass]);
-            $students = $stmt2->fetchAll();
-        }
-        ?>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-        <section id="classes" class="bg-gray-50 p-6 rounded-lg shadow">
+      <?php foreach ($classes as $cls): ?>
+        <div class="bg-gray-50 p-4 rounded shadow">
+          <h3 class="font-semibold"><?= htmlspecialchars($cls['name']) ?></h3>
+          <p class="text-sm text-gray-500"><?= $cls['total_students'] ?> étudiants</p>
 
-            <h2 class="text-xl font-bold mb-5 text-gray-800">Mes Classes</h2>
+          <a href="?class_id=<?= $cls['id'] ?>#students"
+             class="text-blue-600 text-sm">Voir étudiants</a>
+        </div>
+      <?php endforeach; ?>
 
-            <?php if (empty($classes)) { ?>
-                <p class="text-gray-500">Aucune classe.</p>
-            <?php } ?>
+    </div>
+  </section>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <!-- STUDENTS -->
+  <?php if (isset($_GET['class_id'])): ?>
 
-                <?php foreach ($classes as $cls) { ?>
+  <section id="students" class="bg-white p-5 rounded shadow">
+    <h2 class="font-bold mb-4">Étudiants</h2>
 
-                    <div class="bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition">
+    <?php
+    $stmt = $conn->prepare("
+        SELECT u.firstname, u.lastname
+        FROM students s
+        JOIN users u ON u.id = s.user_id
+        WHERE s.class_id = ?
+    ");
+    $stmt->execute([$_GET['class_id']]);
+    $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    ?>
 
-                        <div class="flex justify-between items-center mb-3">
+    <ul class="space-y-2">
+      <?php foreach ($students as $st): ?>
+        <li><?= htmlspecialchars($st['firstname'].' '.$st['lastname']) ?></li>
+      <?php endforeach; ?>
+    </ul>
+  </section>
 
-                            <h3 class="text-lg font-semibold text-gray-800">
-                                <?= htmlspecialchars($cls['name']) ?>
-                            </h3>
+  <?php endif; ?>
 
-                            <span class="bg-blue-100 text-blue-600 text-xs font-semibold px-2 py-1 rounded-full">
-                                <?= $cls['total_students'] ?> étudiants
-                            </span>
+  <!-- FOLLOW UP -->
+  <?php
+  if (isset($_POST['update_status'])) {
+      $stmt = $conn->prepare("
+          UPDATE enrollments e
+          JOIN courses c ON c.id = e.course_id
+          SET e.status = ?
+          WHERE e.id = ? AND c.user_id = ?
+      ");
+      $stmt->execute([
+          $_POST['status'],
+          $_POST['enrollment_id'],
+          $teacher_id
+      ]);
+  }
 
-                        </div>
+  $stmt = $conn->prepare("
+      SELECT 
+          e.id AS enrollment_id,
+          CONCAT(u.firstname,' ',u.lastname) AS student_name,
+          c.title,
+          e.status
+      FROM enrollments e
+      JOIN students s ON s.id = e.student_id
+      JOIN users u ON u.id = s.user_id
+      JOIN courses c ON c.id = e.course_id
+      WHERE c.user_id = ?
+  ");
+  $stmt->execute([$teacher_id]);
+  $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  ?>
 
-                        <a href="?class_id=<?php echo $cls['id']; ?>#students"
-                        class="bg-blue-600 text-white px-3 py-1 rounded text-xs inline-block">
-                            Voir étudiants
-                        </a>
+  <section id="suivi" class="bg-white p-5 rounded shadow">
+    <h2 class="font-bold mb-4">Suivi Pédagogique</h2>
 
-                    </div>
+    <table class="w-full text-sm">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="p-2">Étudiant</th>
+          <th class="p-2">Cours</th>
+          <th class="p-2">Statut</th>
+          <th class="p-2">Action</th>
+        </tr>
+      </thead>
 
-                <?php } ?>
+      <tbody>
+        <?php foreach ($enrollments as $e): ?>
+        <tr class="border-t">
+          <td class="p-2"><?= htmlspecialchars($e['student_name']) ?></td>
+          <td class="p-2"><?= htmlspecialchars($e['title']) ?></td>
 
-            </div>
-        </section>
+          <form method="POST">
+            <td class="p-2">
+              <select name="status" class="border p-1">
+                <option value="actif" <?= $e['status']=='actif'?'selected':'' ?>>Actif</option>
+                <option value="termine" <?= $e['status']=='termine'?'selected':'' ?>>Terminé</option>
+              </select>
+            </td>
 
-        <?php if ($selectedClass) { ?>
+            <td class="p-2">
+              <input type="hidden" name="enrollment_id" value="<?= $e['enrollment_id'] ?>">
+              <button name="update_status" class="bg-blue-600 text-white px-3 py-1 text-xs rounded">
+                Save
+              </button>
+            </td>
+          </form>
 
-        <section id="students" class="bg-white p-5 rounded-lg shadow mt-5">
+        </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+  </section>
 
-            <h2 class="text-xl font-bold mb-4 text-gray-800">
-                Étudiants de la classe
-            </h2>
-
-            <?php if (empty($students)) { ?>
-                <p class="text-gray-500">Aucun étudiant dans cette classe.</p>
-            <?php } else { ?>
-
-                <ul class="space-y-2">
-                    <?php foreach ($students as $st) { ?>
-                        <li class="text-sm text-gray-700 flex items-center gap-2">
-                            <span class="w-2 h-2 bg-green-400 rounded-full"></span>
-                            <?= htmlspecialchars($st['firstname']) ?>
-                            <?= htmlspecialchars($st['lastname']) ?>
-                        </li>
-                    <?php } ?>
-                </ul>
-
-            <?php } ?>
-
-        </section>
-
-        <?php } ?>
-</section>
-    </section>
-
-  <!-- US23 -->
-   <?php
-       $stmt = $conn->prepare("
-            SELECT 
-                e.id AS enrollment_id,
-                CONCAT(u.firstname, ' ', u.lastname) AS student_name,
-                c.title AS course_name,
-                e.status
-            FROM enrollments e
-            JOIN students s ON s.id = e.student_id
-            JOIN users u ON u.id = s.user_id
-            JOIN courses c ON c.id = e.course_id
-        ");
-        $stmt->execute();
-        $enrollments = $stmt->fetchAll();
-        ?>
-
-        <!-- US23 -->
-         <?php
-            if (isset($_POST['update_status'])) {
-
-                $enrollment_id = $_POST['enrollment_id'];
-                $status = $_POST['status'];
-
-                $stmt = $conn->prepare("
-                    UPDATE enrollments 
-                    SET status = ? 
-                    WHERE id = ?
-                ");
-
-                $stmt->execute([$status, $enrollment_id]);
-            }
-            ?>
-        <section id="suivi" class="bg-white p-5 rounded-lg shadow">
-        <h2 class="font-bold mb-4">Suivi Pédagogique</h2>
-
-        <table class="w-full text-sm">
-            <thead class="bg-gray-100">
-            <tr>
-                <th class="p-2 text-left">Étudiant</th>
-                <th class="p-2 text-left">Cours</th>
-                <th class="p-2 text-left">Statut</th>
-                <th class="p-2 text-left">Action</th>
-            </tr>
-            </thead>
-
-            <tbody>
-                <?php foreach ($enrollments as $enroll): ?>
-                <tr class="border-t">
-
-                <td class="p-2"><?= htmlspecialchars($enroll['student_name']) ?></td>
-                <td class="p-2"><?= htmlspecialchars($enroll['course_name']) ?></td>
-
-                <form method="POST" action="">
-                    
-                    <td class="p-2">
-                    <select name="status" class="border rounded p-1 text-sm">
-                        <option value="actif" <?= $enroll['status'] == "actif" ? "selected" : "" ?>>Actif</option>
-                        <option value="termine" <?= $enroll['status'] == "termine" ? "selected" : "" ?>>Terminé</option>
-                    </select>
-                    </td>
-
-                    <td class="p-2">
-                    <input type="hidden" name="enrollment_id" value="<?= $enroll['enrollment_id'] ?>">
-                    <button type="submit" name="update_status"
-                        class="bg-blue-600 text-white px-3 py-1 rounded text-xs">
-                        Save
-                    </button>
-                    </td>
-
-                </form>
-
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-        </section>
-
-  </main>
+</main>
 </div>
 
-<!-- JS ACTIVE LINK -->
 <script>
-  const links = document.querySelectorAll('.nav-link');
-
-  links.forEach(link => {
-    link.addEventListener('click', function () {
-      links.forEach(l => l.classList.remove('bg-blue-900'));
-      this.classList.add('bg-blue-900');
-    });
+const links = document.querySelectorAll('.nav-link');
+links.forEach(link => {
+  link.addEventListener('click', () => {
+    links.forEach(l => l.classList.remove('bg-blue-900'));
+    link.classList.add('bg-blue-900');
   });
+});
 </script>
 
 </body>

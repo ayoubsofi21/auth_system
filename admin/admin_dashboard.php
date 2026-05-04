@@ -1,5 +1,14 @@
 <?php
-require '../scripts/database.php';
+session_start();
+
+include '../scripts/database.php';
+require '../includes/auth.php';
+
+requireLogin();
+requireRole('admin');
+
+// always trust session after auth system
+$user_id = $_SESSION['user_id'];
 ?>
 
 
@@ -45,7 +54,7 @@ require '../scripts/database.php';
       <?php
       // Stats queries
       $totalStudents  = $conn->query("SELECT COUNT(*) FROM students")->fetchColumn();
-      $totalProfessors = $conn->query("SELECT COUNT(*) FROM users LEFT JOIN roles ON users.roles_id = roles.id WHERE roles.label = 'Prof'")->fetchColumn();
+      $totalProfessors = $conn->query("SELECT COUNT(*) FROM users LEFT JOIN roles ON users.role_id = roles.id WHERE roles.label = 'Prof'")->fetchColumn();
       $totalCourses   = $conn->query("SELECT COUNT(*) FROM courses")->fetchColumn();
       $totalClasses   = $conn->query("SELECT COUNT(*) FROM classes")->fetchColumn();
 
@@ -53,7 +62,7 @@ require '../scripts/database.php';
       $studentsPerClass = $conn->query("
     SELECT classes.name, COUNT(students.id) as total
     FROM classes
-    LEFT JOIN students ON students.classes_id = classes.id
+    LEFT JOIN students ON students.class_id = classes.id
     GROUP BY classes.id, classes.name
 ")->fetchAll(PDO::FETCH_ASSOC);
       ?>
@@ -125,9 +134,9 @@ require '../scripts/database.php';
 
           <?php
 
-          $stmt = $conn->query("SELECT users.id AS user_id, users.firstname, users.email, roles.label ,users.roles_id 
+          $stmt = $conn->query("SELECT users.id AS user_id, users.firstname, users.email, roles.label ,users.role_id 
                       FROM users 
-                      LEFT JOIN roles ON users.roles_id = roles.id");
+                      LEFT JOIN roles ON users.role_id = roles.id");
           $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
           $roles = $conn->query("SELECT * FROM roles")->fetchAll(PDO::FETCH_ASSOC);
@@ -231,7 +240,7 @@ require '../scripts/database.php';
         $professors = $conn->query("
     SELECT users.id, users.firstname, users.lastname 
     FROM users 
-    LEFT JOIN roles ON users.roles_id = roles.id 
+    LEFT JOIN roles ON users.role_id = roles.id 
     WHERE roles.label = 'Prof'
 ")->fetchAll(PDO::FETCH_ASSOC);
         ?>
@@ -688,15 +697,3 @@ require '../scripts/database.php';
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
