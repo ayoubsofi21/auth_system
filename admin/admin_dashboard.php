@@ -216,7 +216,7 @@ $user_id = $_SESSION['user_id'];
                 <tr class="border-t">
                   <td class="p-2"><?php echo $class['id']; ?></td>
                   <td class="p-2"><?php echo htmlspecialchars($class['name']); ?></td>
-                  <td class="p-2"><?php echo $class['classrom_number']; ?></td>
+                  <td class="p-2"><?php echo $class['classroom_number']; ?></td>
                 </tr>
               <?php endforeach; ?>
             <?php else: ?>
@@ -287,16 +287,16 @@ $user_id = $_SESSION['user_id'];
            users.firstname, users.lastname,
            courses.title AS course_title
     FROM enrollments
-    LEFT JOIN students ON enrollments.students_id = students.id
-    LEFT JOIN users ON students.users_id = users.id
-    LEFT JOIN courses ON enrollments.courses_id = courses.id
+    LEFT JOIN students ON enrollments.student_id = students.id
+    LEFT JOIN users ON students.user_id = users.id
+    LEFT JOIN courses ON enrollments.course_id = courses.id
 ")->fetchAll(PDO::FETCH_ASSOC);
 
       // Fetch students and courses for the add enrollment dropdown
       $students_list = $conn->query("
     SELECT students.id, users.firstname, users.lastname, students.student_number
     FROM students
-    LEFT JOIN users ON students.users_id = users.id
+    LEFT JOIN users ON students.user_id = users.id
 ")->fetchAll(PDO::FETCH_ASSOC);
 
       $courses_list = $conn->query("SELECT id, title FROM courses")->fetchAll(PDO::FETCH_ASSOC);
@@ -645,7 +645,7 @@ $user_id = $_SESSION['user_id'];
 
             <div class="mb-3">
               <label class="block text-sm font-medium mb-1">Étudiant</label>
-              <select name="students_id" class="w-full border rounded px-3 py-2 text-sm" required>
+              <select name="student_id" class="w-full border rounded px-3 py-2 text-sm" required>
                 <option value="">-- Choisir un étudiant --</option>
                 <?php foreach ($students_list as $student): ?>
                   <option value="<?php echo $student['id']; ?>">
@@ -657,7 +657,7 @@ $user_id = $_SESSION['user_id'];
 
             <div class="mb-3">
               <label class="block text-sm font-medium mb-1">Cours</label>
-              <select name="courses_id" class="w-full border rounded px-3 py-2 text-sm" required>
+              <select name="course_id" class="w-full border rounded px-3 py-2 text-sm" required>
                 <option value="">-- Choisir un cours --</option>
                 <?php foreach ($courses_list as $course): ?>
                   <option value="<?php echo $course['id']; ?>">
