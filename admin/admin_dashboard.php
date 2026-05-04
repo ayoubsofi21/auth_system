@@ -5,7 +5,7 @@ include '../scripts/database.php';
 require '../includes/auth.php';
 
 requireLogin();
-requireRole('admin');
+requireRole('Admin');
 
 // always trust session after auth system
 $user_id = $_SESSION['user_id'];
@@ -29,18 +29,24 @@ $user_id = $_SESSION['user_id'];
   <div class="flex">
 
     <!-- SIDEBAR -->
-    <aside class="w-64 bg-blue-700 text-white min-h-screen p-5 fixed">
-      <h2 class="text-xl font-bold mb-6">Admin Dashboard</h2>
+  <aside class="w-64 bg-blue-700 text-white min-h-screen p-5 fixed flex flex-col">
+    <h2 class="text-xl font-bold mb-6">Admin Dashboard</h2>
 
-      <nav class="space-y-3 text-sm">
-        <a href="#users" class="nav-link block p-2 rounded hover:bg-blue-600">Utilisateurs</a>
-        <a href="#classes" class="nav-link block p-2 rounded hover:bg-blue-600">Classes</a>
-        <a href="#courses" class="nav-link block p-2 rounded hover:bg-blue-600">Cours</a>
-        <a href="#enrollments" class="nav-link block p-2 rounded hover:bg-blue-600">Inscriptions</a>
-        <a href="#stats" class="nav-link block p-2 rounded hover:bg-blue-600">Statistiques</a>
-      </nav>
-    </aside>
+    <nav class="space-y-3 text-sm flex-1">
+      <a href="#users" class="nav-link block p-2 rounded hover:bg-blue-600">Utilisateurs</a>
+      <a href="#classes" class="nav-link block p-2 rounded hover:bg-blue-600">Classes</a>
+      <a href="#courses" class="nav-link block p-2 rounded hover:bg-blue-600">Cours</a>
+      <a href="#enrollments" class="nav-link block p-2 rounded hover:bg-blue-600">Inscriptions</a>
+      <a href="#stats" class="nav-link block p-2 rounded hover:bg-blue-600">Statistiques</a>
+    </nav>
 
+    <!-- Logout always at bottom -->
+    <a href="../scripts/logout.php"
+      class="block p-2 bg-red-500 hover:bg-red-600 rounded text-center mt-auto">
+      Se déconnecter
+    </a>
+  </aside>
+  
     <!-- MAIN -->
     <main class="ml-64 flex-1 p-6 space-y-10">
 
