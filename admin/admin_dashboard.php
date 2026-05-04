@@ -169,7 +169,7 @@ $user_id = $_SESSION['user_id'];
                         data-firstname="<?php echo htmlspecialchars($user['firstname'] ?? '', ENT_QUOTES); ?>"
                         data-lastname="<?php echo htmlspecialchars($user['lastname'] ?? '', ENT_QUOTES); ?>"
                         data-email="<?php echo htmlspecialchars($user['email'] ?? '', ENT_QUOTES); ?>"
-                        data-role="<?php echo $user['roles_id'] ?? ''; ?>"
+                        data-role="<?php echo $user['role_id'] ?? ''; ?>"
                         class="bg-yellow-400 px-4 py-1 rounded text-xs ml-2">Edit</button>
 
                     </form>
@@ -403,7 +403,7 @@ $user_id = $_SESSION['user_id'];
 
             <div class="mb-4">
               <label class="block text-sm font-medium mb-1">Role</label>
-              <select name="roles_id" id="edit_role" class="w-full border rounded px-3 py-2 text-sm">
+              <select name="role_id" id="edit_role" class="w-full border rounded px-3 py-2 text-sm">
                 <?php foreach ($roles as $role): ?>
                   <option value="<?php echo $role['id']; ?>">
                     <?php echo htmlspecialchars($role['label']); ?>
@@ -427,7 +427,7 @@ $user_id = $_SESSION['user_id'];
             data-firstname="<?php echo htmlspecialchars($user['firstname'] ?? '', ENT_QUOTES); ?>"
             data-lastname="<?php echo htmlspecialchars($user['lastname'] ?? '', ENT_QUOTES); ?>"
             data-email="<?php echo htmlspecialchars($user['email'] ?? '', ENT_QUOTES); ?>"
-            data-role="<?php echo $user['roles_id'] ?? ''; ?>"
+            data-role="<?php echo $user['role_id'] ?? ''; ?>"
             class="bg-yellow-400 px-2 py-1 rounded text-xs">
             Edit
           </button>
@@ -514,7 +514,7 @@ $user_id = $_SESSION['user_id'];
 
             <div class="mb-4">
               <label class="block text-sm font-medium mb-1">Role</label>
-              <select name="roles_id" class="w-full border rounded px-3 py-2 text-sm">
+              <select name="role_id" class="w-full border rounded px-3 py-2 text-sm">
                 <?php foreach ($roles as $role): ?>
                   <option value="<?php echo $role['id']; ?>">
                     <?php echo htmlspecialchars($role['label']); ?>

@@ -6,7 +6,7 @@ include '../scripts/database.php';
 // --- ADD ENROLLMENT ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_enrollment'])) {
 
-    $students_id = $_POST['students_id'] ?? null;
+    $students_id = $_POST['student_id'] ?? null;
     $courses_id  = $_POST['courses_id']  ?? null;
     $status      = $_POST['status']      ?? 'active';
 
@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_enrollment'])) {
     }
 
     // Check if already enrolled
-    $check = $conn->prepare("SELECT id FROM enrollments WHERE students_id = ? AND courses_id = ?");
+    $check = $conn->prepare("SELECT id FROM enrollments WHERE student_id = ? AND courses_id = ?");
     $check->execute([$students_id, $courses_id]);
     if ($check->fetch()) {
         die("Cet étudiant est déjà inscrit à ce cours.");
@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_enrollment'])) {
 
     try {
         $stmt = $conn->prepare("
-            INSERT INTO enrollments (students_id, courses_id, status, enrolled_at) 
+            INSERT INTO enrollments (student_id, courses_id, status, enrolled_at) 
             VALUES (?, ?, ?, CURDATE())
         ");
         $stmt->execute([$students_id, $courses_id, $status]);
@@ -137,12 +137,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
     $lastname  = $_POST['lastname']  ?? null;
     $email     = $_POST['email']     ?? null;
     $password  = $_POST['password']  ?? null;
-    $roles_id  = $_POST['roles_id']  ?? null;
+    $role_id  = $_POST['role_id']  ?? null;
     $dateofbirth= $_POST['date_of_birth'] ?? null;
     $studentnumber= $_POST['student_number'] ?? null;
     
 
-    if (!$firstname || !$lastname || !$email || !$password || !$roles_id) {
+    if (!$firstname || !$lastname || !$email || !$password || !$role_id) {
         die("All fields are required.");
     }
 
@@ -160,21 +160,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
 
         // 1. Insert into users
         $stmt = $conn->prepare("
-            INSERT INTO users (firstname, lastname, email, password, roles_id) 
+            INSERT INTO users (firstname, lastname, email, password, role_id) 
             VALUES (?, ?, ?, ?, ?)
         ");
-        $stmt->execute([$firstname, $lastname, $email, $hashedPassword, $roles_id]);
+        $stmt->execute([$firstname, $lastname, $email, $hashedPassword, $role_id]);
 
         $newUserId = $conn->lastInsertId();
 
         // 2. If role is Student, also insert into students table
         $studentRoleId = $conn->query("SELECT id FROM roles WHERE label = 'Student'")->fetchColumn();
 
-        if ($roles_id == $studentRoleId) {
+        if ($role_id == $studentRoleId) {
             $student_number = 'STU-' . str_pad($newUserId, 6, '0', STR_PAD_LEFT);
 
             $stmt2 = $conn->prepare("
-                INSERT INTO students (users_id, student_number, date_of_birth) 
+                INSERT INTO students (user_id, student_number, date_of_birth) 
                 VALUES (?, ?, ?)
             ");
             $stmt2->execute([$newUserId, $student_number, $dateofbirth]);
@@ -196,17 +196,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_save'])) {
     $firstname = $_POST['firstname'] ?? null;
     $lastname  = $_POST['lastname']  ?? null;
     $email     = $_POST['email']     ?? null;
-    $roles_id  = $_POST['roles_id']  ?? null;
+    $role_id  = $_POST['role_id']  ?? null;
 
     if (!$id) die("No user ID provided.");
 
     try {
         $stmt = $conn->prepare("
             UPDATE users 
-            SET firstname = ?, lastname = ?, email = ?, roles_id = ?
+            SET firstname = ?, lastname = ?, email = ?, role_id = ?
             WHERE id = ?
         ");
-        $stmt->execute([$firstname, $lastname, $email, $roles_id, $id]);
+        $stmt->execute([$firstname, $lastname, $email, $role_id, $id]);
 
         header("Location: admin_dashboard.php");
         exit();
@@ -233,19 +233,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
         // 1. Delete enrollments linked to this user's students records
         $conn->prepare("
             DELETE enrollments FROM enrollments 
-            INNER JOIN students ON enrollments.students_id = students.id 
-            WHERE students.users_id = ?
+            INNER JOIN students ON enrollments.student_id = students.id 
+            WHERE students.user_id = ?
         ")->execute([$id]);
 
         // 2. Delete enrollments linked to this user's courses
         $conn->prepare("
             DELETE enrollments FROM enrollments 
-            INNER JOIN courses ON enrollments.courses_id = courses.id 
+            INNER JOIN courses ON enrollments.course_id = courses.id 
             WHERE courses.user_id = ?
         ")->execute([$id]);
 
         // 3. Delete students record linked to this user
-        $conn->prepare("DELETE FROM students WHERE users_id = ?")->execute([$id]);
+        $conn->prepare("DELETE FROM students WHERE user_id = ?")->execute([$id]);
 
         // 4. Delete courses created by this user
         $conn->prepare("DELETE FROM courses WHERE user_id = ?")->execute([$id]);
