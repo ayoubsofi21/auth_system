@@ -21,22 +21,25 @@ $teacher_id = $_SESSION['user_id'];
 <body class="bg-gray-100">
 
 <div class="flex">
-
-<!-- SIDEBAR -->
 <aside class="w-64 bg-blue-700 text-white min-h-screen p-5 fixed">
-  <h2 class="text-xl font-bold mb-6">Prof Dashboard</h2>
+    <h2 class="text-xl font-bold mb-6">Student Dashboard</h2>
 
-  <nav class="space-y-3 text-sm">
-    <a href="#cours" class="nav-link block p-2 rounded hover:bg-blue-600">Mes Cours</a>
-    <a href="#effectifs" class="nav-link block p-2 rounded hover:bg-blue-600">Effectifs</a>
-    <a href="#classes" class="nav-link block p-2 rounded hover:bg-blue-600">Classes</a>
-    <a href="#suivi" class="nav-link block p-2 rounded hover:bg-blue-600">Suivi</a>
-  </nav> 
-  <a href="../scripts/logout.php"
-    class="block p-2 mt-6 bg-red-500 hover:bg-red-600 rounded text-center">
-    Se déconnecter
-    </a>
-</aside>
+    <nav class="space-y-3 text-sm">
+      <a href="#profile" class="block p-2 rounded hover:bg-blue-600">Mon Profil</a>
+      <a href="#courses" class="block p-2 rounded hover:bg-blue-600">Mes Cours</a>
+      <a href="#classmates" class="block p-2 rounded hover:bg-blue-600">Ma Classe</a>
+      <a href="#modules" class="block p-2 rounded hover:bg-blue-600">Modules</a>
+    </nav>
+
+    <div class="absolute bottom-5 left-5 right-5">
+        <form action="../scripts/logout.php" method="POST" class="absolute bottom-5 left-5 right-5">
+        <button type="submit" name="logout"
+            class="w-full text-center bg-red-500 hover:bg-red-600 text-white text-sm p-2 rounded">
+            Se déconnecter
+        </button>
+        </form>
+    </div>
+  </aside>
 
 <!-- MAIN -->
 <main class="ml-64 flex-1 p-6 space-y-10">
