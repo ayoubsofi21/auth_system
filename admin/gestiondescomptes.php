@@ -2,19 +2,16 @@
 session_start();
 include '../scripts/database.php';
 
-
-// --- ADD ENROLLMENT ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_enrollment'])) {
 
     $students_id = $_POST['student_id'] ?? null;
-    $courses_id  = $_POST['courses_id']  ?? null;
-    $status      = $_POST['status']      ?? 'active';
+    $courses_id  = $_POST['courses_id'] ?? null;
+    $status      = $_POST['status'] ?? 'active';
 
     if (!$students_id || !$courses_id) {
         die("Veuillez sélectionner un étudiant et un cours.");
     }
 
-    // Check if already enrolled
     $check = $conn->prepare("SELECT id FROM enrollments WHERE student_id = ? AND courses_id = ?");
     $check->execute([$students_id, $courses_id]);
     if ($check->fetch()) {
@@ -36,11 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_enrollment'])) {
     }
 }
 
-// --- TOGGLE ENROLLMENT STATUS ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_enrollment_status'])) {
 
     $enrollment_id = $_POST['enrollment_id'] ?? null;
-    $new_status    = $_POST['new_status']    ?? null;
+    $new_status    = $_POST['new_status'] ?? null;
 
     if (!$enrollment_id || !in_array($new_status, ['active', 'inactive'])) {
         die("Données invalides.");
@@ -58,7 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_enrollment_sta
     }
 }
 
-// --- DELETE ENROLLMENT ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_enrollment'])) {
 
     $enrollment_id = $_POST['enrollment_id'] ?? null;
@@ -79,16 +74,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_enrollment']))
     }
 }
 
-// --- ADD COURSE ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_course'])) {
 
-    $title       = $_POST['title']       ?? null;
+    $title       = $_POST['title'] ?? null;
     $description = $_POST['description'] ?? '';
     $total_hours = $_POST['total_hours'] ?? null;
-    $user_id     = $_POST['user_id']     ?? null;
+    $user_id     = $_POST['user_id'] ?? null;
 
-    if (!$title || !$total_hours ||
- !$user_id) {
+    if (!$title || !$total_hours || !$user_id) {
         die("Tous les champs obligatoires doivent être remplis.");
     }
 
@@ -107,11 +100,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_course'])) {
     }
 }
 
-// --- ADD CLASS ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_class'])) {
 
-    $name             = $_POST['class_name']        ?? null;
-    $classroom_number = $_POST['classroom_number']  ?? null;
+    $name             = $_POST['class_name'] ?? null;
+    $classroom_number = $_POST['classroom_number'] ?? null;
 
     if (!$name || !$classroom_number) {
         die("Tous les champs sont obligatoires.");
@@ -129,24 +121,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_class'])) {
     }
 }
 
-
-// --- ADD USER ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
 
     $firstname = $_POST['firstname'] ?? null;
-    $lastname  = $_POST['lastname']  ?? null;
-    $email     = $_POST['email']     ?? null;
-    $password  = $_POST['password']  ?? null;
-    $role_id  = $_POST['role_id']  ?? null;
-    $dateofbirth= $_POST['date_of_birth'] ?? null;
-    $studentnumber= $_POST['student_number'] ?? null;
-    
+    $lastname  = $_POST['lastname'] ?? null;
+    $email     = $_POST['email'] ?? null;
+    $password  = $_POST['password'] ?? null;
+    $role_id   = $_POST['role_id'] ?? null;
+    $dateofbirth = $_POST['date_of_birth'] ?? null;
 
     if (!$firstname || !$lastname || !$email || !$password || !$role_id) {
         die("All fields are required.");
     }
 
-    // Check if email already exists
     $check = $conn->prepare("SELECT id FROM users WHERE email = ?");
     $check->execute([$email]);
     if ($check->fetch()) {
@@ -158,7 +145,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
     try {
         $conn->beginTransaction();
 
-        // 1. Insert into users
         $stmt = $conn->prepare("
             INSERT INTO users (firstname, lastname, email, password, role_id) 
             VALUES (?, ?, ?, ?, ?)
@@ -167,7 +153,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
 
         $newUserId = $conn->lastInsertId();
 
-        // 2. If role is Student, also insert into students table
         $studentRoleId = $conn->query("SELECT id FROM roles WHERE label = 'Student'")->fetchColumn();
 
         if ($role_id == $studentRoleId) {
@@ -189,14 +174,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
         die("Failed to add user: " . $e->getMessage());
     }
 }
-// --- EDIT ---
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_save'])) {
 
-    $id        = $_POST['user_id']   ?? null;
+    $id        = $_POST['user_id'] ?? null;
     $firstname = $_POST['firstname'] ?? null;
-    $lastname  = $_POST['lastname']  ?? null;
-    $email     = $_POST['email']     ?? null;
-    $role_id  = $_POST['role_id']  ?? null;
+    $lastname  = $_POST['lastname'] ?? null;
+    $email     = $_POST['email'] ?? null;
+    $role_id   = $_POST['role_id'] ?? null;
 
     if (!$id) die("No user ID provided.");
 
@@ -216,9 +201,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_save'])) {
     }
 }
 
-
-
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
 
     $id = $_POST['user_id'] ?? null;
@@ -230,27 +212,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
     try {
         $conn->beginTransaction();
 
-        // 1. Delete enrollments linked to this user's students records
         $conn->prepare("
             DELETE enrollments FROM enrollments 
             INNER JOIN students ON enrollments.student_id = students.id 
             WHERE students.user_id = ?
         ")->execute([$id]);
 
-        // 2. Delete enrollments linked to this user's courses
         $conn->prepare("
             DELETE enrollments FROM enrollments 
             INNER JOIN courses ON enrollments.course_id = courses.id 
             WHERE courses.user_id = ?
         ")->execute([$id]);
 
-        // 3. Delete students record linked to this user
         $conn->prepare("DELETE FROM students WHERE user_id = ?")->execute([$id]);
-
-        // 4. Delete courses created by this user
         $conn->prepare("DELETE FROM courses WHERE user_id = ?")->execute([$id]);
-
-        // 5. Finally delete the user
         $conn->prepare("DELETE FROM users WHERE id = ?")->execute([$id]);
 
         $conn->commit();
@@ -262,19 +237,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
         die("Deletion failed: " . $e->getMessage());
     }
 }
-
-
-
-
-
-
-
-
 ?>
-
-
-
-
-
-
-

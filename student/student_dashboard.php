@@ -7,12 +7,8 @@ require '../includes/auth.php';
 requireLogin();
 requireRole('Student');
 
-// always trust session after auth system
 $user_id = $_SESSION['user_id'];
 
-/* =========================
-   PROFILE
-========================= */
 $stmt = $conn->prepare("
     SELECT u.firstname, u.lastname, u.email, c.name AS classe
     FROM users u
@@ -23,9 +19,6 @@ $stmt = $conn->prepare("
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-/* =========================
-   COURSES
-========================= */
 $stmt = $conn->prepare("
     SELECT c.title, u.firstname AS prof_name
     FROM enrollments e
@@ -37,9 +30,6 @@ $stmt = $conn->prepare("
 $stmt->execute([$user_id]);
 $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-/* =========================
-   CLASSMATES
-========================= */
 $stmt = $conn->prepare("
     SELECT u.firstname, u.lastname
     FROM students s
@@ -52,9 +42,6 @@ $stmt = $conn->prepare("
 $stmt->execute([$user_id, $user_id]);
 $classmates = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-/* =========================
-   MODULES
-========================= */
 $stmt = $conn->prepare("
     SELECT c.title, c.description, c.total_hours
     FROM enrollments e
@@ -77,7 +64,6 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body class="bg-gray-100">
 <div class="flex">
 
-  <!-- SIDEBAR -->
   <aside class="w-64 bg-blue-700 text-white min-h-screen p-5 fixed">
     <h2 class="text-xl font-bold mb-6">Student Dashboard</h2>
 
@@ -89,16 +75,15 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </nav>
 
     <div class="absolute bottom-5 left-5 right-5">
-        <form action="../scripts/logout.php" method="POST" class="absolute bottom-5 left-5 right-5">
+      <form action="../scripts/logout.php" method="POST" class="absolute bottom-5 left-5 right-5">
         <button type="submit" name="logout"
-            class="w-full text-center bg-red-500 hover:bg-red-600 text-white text-sm p-2 rounded">
-            Se déconnecter
+          class="w-full text-center bg-red-500 hover:bg-red-600 text-white text-sm p-2 rounded">
+          Se déconnecter
         </button>
-        </form>
+      </form>
     </div>
   </aside>
 
-  <!-- MAIN -->
   <main class="ml-64 flex-1 p-6 space-y-10">
 
     <div>
@@ -106,7 +91,6 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <p class="text-gray-500 text-sm">Espace personnel et suivi académique</p>
     </div>
 
-    <!-- PROFILE -->
     <section id="profile" class="bg-white p-5 rounded-lg shadow">
       <h2 class="font-bold mb-4">Mon Profil Académique</h2>
 
@@ -126,7 +110,6 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <?php endif; ?>
     </section>
 
-    <!-- COURSES -->
     <section id="courses" class="bg-white p-5 rounded-lg shadow">
       <h2 class="font-bold mb-4">Mon Programme</h2>
 
@@ -152,7 +135,6 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <?php endif; ?>
     </section>
 
-    <!-- CLASSMATES -->
     <section id="classmates" class="bg-white p-5 rounded-lg shadow">
       <h2 class="font-bold mb-4">Ma Classe</h2>
 
@@ -170,7 +152,6 @@ $modules = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <?php endif; ?>
     </section>
 
-    <!-- MODULES -->
     <section id="modules" class="bg-white p-5 rounded-lg shadow">
       <h2 class="font-bold mb-4">Modules</h2>
 

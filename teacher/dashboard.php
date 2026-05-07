@@ -41,7 +41,6 @@ $teacher_id = $_SESSION['user_id'];
     </div>
   </aside>
 
-<!-- MAIN -->
 <main class="ml-64 flex-1 p-6 space-y-10">
 
   <div>
@@ -49,16 +48,13 @@ $teacher_id = $_SESSION['user_id'];
     <p class="text-gray-500 text-sm">Gérez vos cours et vos étudiants</p>
   </div>
 
-  <!-- STATS -->
   <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
 
     <?php
-    // My courses
     $stmt = $conn->prepare("SELECT COUNT(*) FROM courses WHERE user_id = ?");
     $stmt->execute([$teacher_id]);
     $courses_count = $stmt->fetchColumn();
 
-    // Students
     $stmt = $conn->prepare("
         SELECT COUNT(*)
         FROM students s
@@ -69,7 +65,6 @@ $teacher_id = $_SESSION['user_id'];
     $stmt->execute([$teacher_id]);
     $students_count = $stmt->fetchColumn();
 
-    // Classes
     $stmt = $conn->prepare("
         SELECT COUNT(DISTINCT c.id)
         FROM classes c
@@ -81,7 +76,6 @@ $teacher_id = $_SESSION['user_id'];
     $stmt->execute([$teacher_id]);
     $classes_count = $stmt->fetchColumn();
 
-    // Active enrollments
     $stmt = $conn->prepare("
         SELECT COUNT(*)
         FROM enrollments e
@@ -114,7 +108,6 @@ $teacher_id = $_SESSION['user_id'];
 
   </div>
 
-  <!-- COURSES -->
   <section id="cours" class="bg-white p-5 rounded shadow">
     <h2 class="font-bold mb-4">Mes Enseignements</h2>
 
@@ -134,7 +127,6 @@ $teacher_id = $_SESSION['user_id'];
     </ul>
   </section>
 
-  <!-- EFFECTIFS -->
   <section id="effectifs" class="bg-white p-5 rounded shadow">
     <h2 class="font-bold mb-4">Gestion des Effectifs</h2>
 
@@ -176,7 +168,6 @@ $teacher_id = $_SESSION['user_id'];
     </table>
   </section>
 
-  <!-- CLASSES -->
   <section id="classes" class="bg-white p-5 rounded shadow">
     <h2 class="font-bold mb-4">Mes Classes</h2>
 
@@ -209,7 +200,6 @@ $teacher_id = $_SESSION['user_id'];
     </div>
   </section>
 
-  <!-- STUDENTS -->
   <?php if (isset($_GET['class_id'])): ?>
 
   <section id="students" class="bg-white p-5 rounded shadow">
@@ -235,7 +225,6 @@ $teacher_id = $_SESSION['user_id'];
 
   <?php endif; ?>
 
-  <!-- FOLLOW UP -->
   <?php
   if (isset($_POST['update_status'])) {
       $stmt = $conn->prepare("
